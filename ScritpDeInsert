@@ -1,0 +1,30 @@
+-- Criar tabela temporária
+CREATE TABLE #IncrementTable (
+    IncrementValue INT IDENTITY(1, 1),
+    PRIMARY KEY (IncrementValue)
+);
+
+-- Inserir 100 valores de incremento
+DECLARE @Counter INT = 1;
+WHILE @Counter <= 100
+BEGIN
+    INSERT INTO #IncrementTable DEFAULT VALUES;
+    SET @Counter = @Counter + 1;
+END;
+
+-- Inserção de 100 produtos aleatórios
+INSERT INTO Product (Name, Description, Price, Stock, Image, CategoryId)
+SELECT TOP 100
+    'Produto Aleatório ' + CONVERT(NVARCHAR(5), IncrementValue) AS Name,
+    'Descrição do Produto ' + CONVERT(NVARCHAR(5), IncrementValue) AS Description,
+    --CAST(RAND() * 100 AS DECIMAL(18, 2)) AS Price,
+    --CAST(RAND() * 100 AS INT) AS Stock,
+	 CAST(IncrementValue AS DECIMAL(18, 2)) AS Price,
+    CAST(IncrementValue AS INT) AS Stock,
+    'Caminho/URL da Imagem ' + CONVERT(NVARCHAR(5), IncrementValue) AS Image,
+    --CAST(CEILING(RAND() * 10) AS INT) AS CategoryId
+	ABS(CHECKSUM(NEWID())) % 10 + 1 AS CategoryId
+FROM #IncrementTable order by IncrementValue;
+
+-- Remover tabela temporária
+DROP TABLE #IncrementTable;
